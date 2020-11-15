@@ -1,9 +1,12 @@
 package src;
 
 import javax.swing.*;
+
 import java.awt.*;
+import java.awt.geom.*;
 import java.awt.event.*;
-import src.Model;
+//import src.Model;
+//import src.Control;
 
 public class View {
     public View() {
@@ -31,6 +34,7 @@ class MyFrame extends JFrame {
         setLocationRelativeTo(null);
 
         MyPanel panel = new MyPanel();
+
         setContentPane(panel);
     }
 }
@@ -38,16 +42,28 @@ class MyFrame extends JFrame {
 class MyPanel extends JPanel {
     // private MyFrame frame;
 
+    private static Timer timer;
+    // DrawBoard board;
+    // DrawBoard board = new DrawBoard();
+
     MyPanel() {
         super(new BorderLayout());
         init();
+        // Control.addControl(this);
+        Control C = new Control();
         // this.frame = frame;
     }
 
     private void init() {
         Frame Left = new Frame();
-
+        // board = new DrawBoard();
+        DrawBoard board = new DrawBoard();
         add(Left, BorderLayout.WEST);
+        // JPanel Board = new JPanel();
+        // Board.add(board);
+        Control.addControl(board);
+        add(board, BorderLayout.CENTER);
+        // add(board, BorderLayout.CENTER);
     }
 
 }
@@ -76,6 +92,7 @@ class Frame extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Model.CurrentState = 1;
+                System.out.println(Model.CurrentState);
             }
         });
 
@@ -86,6 +103,16 @@ class Frame extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Model.CurrentState = 2;
+            }
+        });
+
+        final JButton btnDrawRentangle = new JButton();
+        btnDrawRentangle.setIcon(new ImageIcon("./img/Rectangle.png"));
+        btnDrawRentangle.setBorderPainted(false);
+        btnDrawRentangle.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Model.CurrentState = 3;
             }
         });
 
@@ -126,6 +153,7 @@ class Frame extends JPanel {
         vBox.add(btnClick);
         vBox.add(btnDrawLine);
         vBox.add(btnDrawCircle);
+        vBox.add(btnDrawRentangle);
         vBox.add(btnText);
         vBox.add(btnSave);
         vBox.add(btnLoad);
@@ -134,14 +162,52 @@ class Frame extends JPanel {
 
 }
 
-class DrawBoard extends Canvas {
+class DrawBoard extends JComponent {
     DrawBoard() {
-
     }
 
-    public final void paint(Graphics g) {
-        super.paint(g);
+    private void paintBackground(Graphics2D g2) {
+        g2.setPaint(Color.LIGHT_GRAY);
+        for (int i = 0; i < getSize().width; i += 10) {
+            Shape line = new Line2D.Float(i, 0, i, getSize().height);
+            g2.draw(line);
+        }
 
+        for (int i = 0; i < getSize().height; i += 10) {
+            Shape line = new Line2D.Float(0, i, getSize().width, i);
+            g2.draw(line);
+        }
     }
 
+    public void paint(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        paintBackground(g2);
+
+        // g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.50f));
+
+        if (Model.startP != null && Model.endP != null) {
+            Shape temp = null;
+            g2.setPaint(Color.BLACK);
+            g2.setStroke(new BasicStroke(10));
+            temp = Control.createShape(Model.startP, Model.endP, Model.CurrentState);
+            /*
+             * switch (Model.CurrentState) { case 1: temp = new Line2D.Float(Model.startP,
+             * Model.endP); break; case 2: temp = new Ellipse2D.Float(Model.startP.x,
+             * Model.startP.y, Math.abs(Model.endP.x - Model.startP.x),
+             * Math.abs(Model.endP.y - Model.startP.y)); break; case 3: temp = new
+             * Rectangle2D.Float(Math.min(Model.startP.x, Model.endP.x),
+             * Math.min(Model.startP.y, Model.endP.y), Math.abs(Model.endP.x -
+             * Model.startP.x), Math.abs(Model.endP.y - Model.startP.y)); break; }
+             */
+            if (temp != null)
+                g2.draw(temp);
+        }
+
+        for (int i = 0; i < Model.itemsM.size(); i++) {
+            g2.setColor(Model.itemsM.get(i).getColor());
+            g2.setStroke(new BasicStroke(Model.itemsM.get(i).getSize()));
+            g2.draw(Model.itemsM.get(i).getItem());
+        }
+    }
 }
