@@ -1,26 +1,22 @@
 package src;
 
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-//import javax.swing.JOptionPane;
-
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.awt.*;
 
 public class Control {
     Control() {
-
     }
 
+    // Mouse event
     public static void addControl(JComponent p) {
         p.addMouseListener(new MouseAdapter() {
+            // mouse-pressing event
             public void mousePressed(MouseEvent e) {
-                System.out.println(e.getY());
                 Model.startP = new Point(e.getX(), e.getY());
                 if (Model.CurrentState == 0) {
                     int i = 0;
-                    // System.out.println(Model.itemsM.size());
                     for (itemsMesg t : Model.itemsM) {
                         if (t.ifContain()) {
                             t.chosen = true;
@@ -33,6 +29,7 @@ public class Control {
                 p.repaint();
             }
 
+            // mouse-releasing event
             public void mouseReleased(MouseEvent e) {
                 if (Model.CurrentState == 4) {
                     Model.itemsM.add(new itemsMesg(Model.CurrentState, Model.curText));
@@ -54,8 +51,6 @@ public class Control {
                             t.p2 = new Point((int) (t.getEndP().getX() + (e.getX() - Model.startP.getX())),
                                     (int) (t.getEndP().getY() + (e.getY() - Model.startP.getY())));
                         }
-
-                        // Model.choosingIndex = -1;
                     }
                 }
                 Model.startP = null;
@@ -64,11 +59,11 @@ public class Control {
             }
         });
 
+        // mouse-dragging event
         p.addMouseMotionListener(new MouseMotionAdapter() {
             public void mouseDragged(MouseEvent e) {
                 Model.endP = new Point(e.getX(), e.getY());
                 if (Model.CurrentState == 0) {
-                    // System.out.println(Model.choosingIndex);
                     if (Model.choosingIndex >= 0) {
                         itemsMesg t = Model.itemsM.get(Model.choosingIndex);
                         if (t.getState() == 4) {
@@ -91,57 +86,9 @@ public class Control {
             }
         });
 
-        p.addKeyListener(new KeyAdapter() {
-            public void keyPressed(KeyEvent e) {
-                System.out.println("DOWN");
-                // 获取键值，和 KeyEvent.VK_XXXX 常量比较确定所按下的按键
-                int keyCode = e.getKeyCode();
-                if (Model.choosingIndex >= 0) {
-                    itemsMesg t = Model.itemsM.get(Model.choosingIndex);
-                    switch (keyCode) {
-                        case KeyEvent.VK_Q:
-                            if (t.size >= 2)
-                                t.size--;
-                            break;
-                        case KeyEvent.VK_E:
-                            t.size++;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                p.repaint();
-                System.out.println("按下: " + e.getKeyCode());
-            }
-        });
-
     }
 
-    public static void addKeyControl(JFrame p) {
-        // Control x = new Control();
-        p.addKeyListener(new KeyAdapter() {
-            public void keyPressed(KeyEvent e) {
-                System.out.println("DOWN");
-                // 获取键值，和 KeyEvent.VK_XXXX 常量比较确定所按下的按键
-                int keyCode = e.getKeyCode();
-                if (Model.choosingIndex >= 0) {
-                    itemsMesg t = Model.itemsM.get(Model.choosingIndex);
-                    switch (keyCode) {
-                        case KeyEvent.VK_Q:
-                            if (t.size >= 2)
-                                t.size--;
-                            break;
-                        case KeyEvent.VK_E:
-                            t.size++;
-                            break;
-                    }
-                }
-                // p.repaint();
-                System.out.println("按下: " + e.getKeyCode());
-            }
-        });
-    }
-
+    // return the shape you want to create
     static Shape createShape(Point x1, Point x2, int state) {
         Shape temp = null;
 

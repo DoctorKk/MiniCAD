@@ -7,40 +7,38 @@ import java.awt.event.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-//import src.Model;
-//import src.Control;
 
-public class View {
-
-    public View() {
-        MyFrame frame = new MyFrame();
-        frame.addKeyListener(new KeyAdapter() {
-            public void keyPressed(KeyEvent e) {
-                // 获取键值，和 KeyEvent.VK_XXXX 常量比较确定所按下的按键
-                int keyCode = e.getKeyCode();
-                System.out.println("按下: " + e.getKeyCode());
-            }
-
-            public void keyTyped(KeyEvent e) {
-                // e.getKeyChar() 获取键入的字符
-                System.out.println("键入: " + e.getKeyChar());
-            }
-
-            public void keyReleased(KeyEvent e) {
-                System.out.println("释放: " + e.getKeyCode());
-            }
-        });
-        // Control.addKeyControl(frame);
-        frame.setVisible(true);
-    }
-}
-
-class MyFrame extends JFrame {
+public class View extends JFrame implements AWTEventListener {
     private final String TITLE = "MiniCAD";
     private final int HEIGHT = 900;
     private final int WIDTH = 1600;
     private static Timer timer;
 
+    public View() {
+        super();
+        init();
+
+        // start timer
+        timer = new Timer(100, new ReboundListener());
+        timer.start();
+    }
+
+    // initialize
+    private void init() {
+        setTitle(TITLE);
+        setSize(WIDTH, HEIGHT);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        // add KeyListener
+        getToolkit().addAWTEventListener(this, AWTEvent.KEY_EVENT_MASK);
+
+        // add panel
+        MyPanel panel = new MyPanel();
+        setContentPane(panel);
+        setVisible(true);
+    }
+
+    // for timer,refresh the screen
     private class ReboundListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -48,56 +46,74 @@ class MyFrame extends JFrame {
         }
     }
 
-    MyFrame() {
-        super();
-        init();
-        timer = new Timer(100, new ReboundListener());
-        timer.start();
+    // Key Event
+    @Override
+    public void eventDispatched(AWTEvent event) {
+        if (Model.choosingIndex < 0)
+            return;
+        if (event.getID() == KeyEvent.KEY_PRESSED) {
+            KeyEvent e = (KeyEvent) event;
+            itemsMesg temp = Model.itemsM.get(Model.choosingIndex);
+            if (Model.choosingIndex >= 0) {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_Q:
+                        temp.size = temp.size < 5 ? 5 : (temp.size - 1);
+                        break;
+                    case KeyEvent.VK_E:
+                        temp.size++;
+                        break;
+                    case KeyEvent.VK_A:
+                        if (temp.getState() == 4) {
+                            temp.size = temp.size < 5 ? 5 : (temp.size - 1);
+                        } else {
+                            temp.p2.translate(-5, -5 * (temp.p2.y - temp.p1.y) / (temp.p2.x - temp.p1.x));
+                            temp.setItem(Control.createShape(temp.p1, temp.p2, temp.getState()));
+                        }
+                        break;
+                    case KeyEvent.VK_D:
+                        if (temp.getState() == 4) {
+                            temp.size++;
+                        } else {
+                            temp.p2.translate(5, 5 * (temp.p2.y - temp.p1.y) / (temp.p2.x - temp.p1.x));
+                            temp.setItem(Control.createShape(temp.p1, temp.p2, temp.getState()));
+                        }
+                        break;
+                    case KeyEvent.VK_R:
+                        Model.itemsM.remove(Model.choosingIndex);
+                        Model.choosingIndex = -1;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            System.out.println(e.getKeyCode());
+        }
     }
 
-    private void init() {
-        setTitle(TITLE);
-        setSize(WIDTH, HEIGHT);
-
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-        setLocationRelativeTo(null);
-
-        MyPanel panel = new MyPanel();
-
-        setContentPane(panel);
-    }
 }
 
 class MyPanel extends JPanel {
-    // private MyFrame frame;
-
     private static Timer timer;
-    // DrawBoard board;
-    // DrawBoard board = new DrawBoard();
 
+    // initialize, use BorderLayout
     MyPanel() {
         super(new BorderLayout());
         init();
-        // Control.addControl(this);
-        // Control C = new Control();
-        // this.frame = frame;
     }
 
+    // some buttons put in the left, drawing board put in the center
     private void init() {
         Frame Left = new Frame();
-        // board = new DrawBoard();
         DrawBoard board = new DrawBoard();
-        add(Left, BorderLayout.WEST);
-        // JPanel Board = new JPanel();
-        // Board.add(board);
         Control.addControl(board);
-        add(board, BorderLayout.CENTER);
-        // add(board, BorderLayout.CENTER);
-    }
 
+        add(Left, BorderLayout.WEST);
+        add(board, BorderLayout.CENTER);
+
+    }
 }
 
+// buttons
 class Frame extends JPanel {
     Frame() {
         super();
@@ -105,6 +121,7 @@ class Frame extends JPanel {
     }
 
     private void init() {
+        // button for select
         final JButton btnClick = new JButton();
         btnClick.setIcon(new ImageIcon("./img/Click.png"));
         btnClick.setBorderPainted(false);
@@ -112,9 +129,11 @@ class Frame extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Model.CurrentState = 0;
+                Model.choosingIndex = -1;
             }
         });
 
+        // draw lines
         final JButton btnDrawLine = new JButton();
         btnDrawLine.setIcon(new ImageIcon("./img/Line.png"));
         btnDrawLine.setBorderPainted(false);
@@ -122,12 +141,14 @@ class Frame extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Model.CurrentState = 1;
+                Model.choosingIndex = -1;
                 Model.startP = null;
                 Model.endP = null;
-                // System.out.println(Model.CurrentState);
+
             }
         });
 
+        // draw ellipses
         final JButton btnDrawCircle = new JButton();
         btnDrawCircle.setIcon(new ImageIcon("./img/Circle.png"));
         btnDrawCircle.setBorderPainted(false);
@@ -135,11 +156,12 @@ class Frame extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Model.CurrentState = 2;
+                Model.choosingIndex = -1;
                 Model.startP = null;
                 Model.endP = null;
             }
         });
-
+        // draw rectangles
         final JButton btnDrawRentangle = new JButton();
         btnDrawRentangle.setIcon(new ImageIcon("./img/Rectangle.png"));
         btnDrawRentangle.setBorderPainted(false);
@@ -147,11 +169,12 @@ class Frame extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Model.CurrentState = 3;
+                Model.choosingIndex = -1;
                 Model.startP = null;
                 Model.endP = null;
             }
         });
-
+        // insert text
         final JButton btnText = new JButton();
         btnText.setIcon(new ImageIcon("./img/Text.png"));
         btnText.setBorderPainted(false);
@@ -162,35 +185,33 @@ class Frame extends JPanel {
                 Model.curText = JOptionPane.showInputDialog(null, "输入文本内容:", "Text");
             }
         });
-
+        // save as file
         final JButton btnSave = new JButton();
         btnSave.setIcon(new ImageIcon("./img/Save.png"));
         btnSave.setBorderPainted(false);
         btnSave.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Model.CurrentState = 3;
-                // showFileOpenDialog(null);
+
                 showFileSaveDialog(null);
             }
         });
-
+        // load file
         final JButton btnLoad = new JButton();
         btnLoad.setIcon(new ImageIcon("./img/Load.png"));
         btnLoad.setBorderPainted(false);
         btnLoad.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Model.CurrentState = 3;
-                showFileOpenDialog(null);
-                // try {
-                // Model.deserializeItem();
-                // } catch (Exception t) {
 
-                // }
+                showFileOpenDialog(null);
+                Model.choosingIndex = -1;
+                Model.startP = null;
+                Model.endP = null;
+
             }
         });
-
+        // select color
         final JButton btnColor = new JButton();
         btnColor.setIcon(new ImageIcon("./img/Color.png"));
         btnColor.setBorderPainted(false);
@@ -207,9 +228,6 @@ class Frame extends JPanel {
             }
         });
 
-        final JButton btnBlank = new JButton();
-        btnBlank.setBorderPainted(false);
-
         Box vBox = Box.createVerticalBox();
         vBox.add(btnClick);
         vBox.add(btnDrawLine);
@@ -224,9 +242,7 @@ class Frame extends JPanel {
 
     private static void showFileOpenDialog(Component parent) {
         JFileChooser fileChooser = new JFileChooser();
-
         fileChooser.setCurrentDirectory(new File("."));
-
         fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         fileChooser.setMultiSelectionEnabled(false);
 
@@ -238,40 +254,36 @@ class Frame extends JPanel {
             try {
                 Model.deserializeItem(file);
             } catch (Exception t) {
-
+                System.out.println("Something went wrong while loading a file");
             }
         }
     }
 
     private static void showFileSaveDialog(Component parent) {
-        // 创建一个默认的文件选取器
         JFileChooser fileChooser = new JFileChooser();
 
-        // 设置打开文件选择框后默认输入的文件名
-        fileChooser.setSelectedFile(new File("测试文件.zip"));
+        fileChooser.setSelectedFile(new File("File"));
 
-        // 打开文件选择框（线程将被阻塞, 直到选择框被关闭）
         int result = fileChooser.showSaveDialog(parent);
 
         if (result == JFileChooser.APPROVE_OPTION) {
-            // 如果点击了"保存", 则获取选择的保存路径
+
             File file = fileChooser.getSelectedFile();
             try {
                 Model.serializeItem(file);
-            } catch (FileNotFoundException t) {
-
-            } catch (IOException t) {
-
+            } catch (Exception t) {
+                System.out.println("Something went wrong while saving");
             }
         }
     }
-
 }
 
+// Drawing board
 class DrawBoard extends JComponent {
     DrawBoard() {
     }
 
+    // draw the background
     private void paintBackground(Graphics2D g2) {
         g2.setPaint(Color.LIGHT_GRAY);
         for (int i = 0; i < getSize().width; i += 10) {
@@ -285,11 +297,13 @@ class DrawBoard extends JComponent {
         }
     }
 
+    // draw all the objects
     public void paint(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         paintBackground(g2);
 
+        // draw the object you have not finished yet
         if (Model.startP != null && Model.endP != null) {
             if (Model.CurrentState == 4) {
                 g2.setFont(new Font(null, Font.PLAIN, 25));
@@ -302,9 +316,8 @@ class DrawBoard extends JComponent {
                 if (temp != null)
                     g2.draw(temp);
             }
-
         }
-
+        // draw all the objects
         for (int i = 0; i < Model.itemsM.size(); i++) {
             g2.setColor(Model.itemsM.get(i).getColor());
             g2.setStroke(new BasicStroke(Model.itemsM.get(i).getSize()));
