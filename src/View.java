@@ -123,7 +123,7 @@ class Frame extends JPanel {
     private void init() {
         // button for select
         final JButton btnClick = new JButton();
-        btnClick.setIcon(new ImageIcon("./img/Click.png"));
+        btnClick.setIcon(new ImageIcon(this.getClass().getClassLoader().getResource("./img/Click.png")));
         btnClick.setBorderPainted(false);
         btnClick.addActionListener(new ActionListener() {
             @Override
@@ -135,7 +135,7 @@ class Frame extends JPanel {
 
         // draw lines
         final JButton btnDrawLine = new JButton();
-        btnDrawLine.setIcon(new ImageIcon("./img/Line.png"));
+        btnDrawLine.setIcon(new ImageIcon(this.getClass().getClassLoader().getResource("./img/Line.png")));
         btnDrawLine.setBorderPainted(false);
         btnDrawLine.addActionListener(new ActionListener() {
             @Override
@@ -150,7 +150,7 @@ class Frame extends JPanel {
 
         // draw ellipses
         final JButton btnDrawCircle = new JButton();
-        btnDrawCircle.setIcon(new ImageIcon("./img/Circle.png"));
+        btnDrawCircle.setIcon(new ImageIcon(this.getClass().getClassLoader().getResource("./img/Circle.png")));
         btnDrawCircle.setBorderPainted(false);
         btnDrawCircle.addActionListener(new ActionListener() {
             @Override
@@ -163,7 +163,7 @@ class Frame extends JPanel {
         });
         // draw rectangles
         final JButton btnDrawRentangle = new JButton();
-        btnDrawRentangle.setIcon(new ImageIcon("./img/Rectangle.png"));
+        btnDrawRentangle.setIcon(new ImageIcon(this.getClass().getClassLoader().getResource("./img/Rectangle.png")));
         btnDrawRentangle.setBorderPainted(false);
         btnDrawRentangle.addActionListener(new ActionListener() {
             @Override
@@ -176,18 +176,18 @@ class Frame extends JPanel {
         });
         // insert text
         final JButton btnText = new JButton();
-        btnText.setIcon(new ImageIcon("./img/Text.png"));
+        btnText.setIcon(new ImageIcon(this.getClass().getClassLoader().getResource("./img/Text.png")));
         btnText.setBorderPainted(false);
         btnText.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Model.CurrentState = 4;
-                Model.curText = JOptionPane.showInputDialog(null, "输入文本内容:", "Text");
+                Model.curText = JOptionPane.showInputDialog(null, "杈撳叆鏂囨湰鍐呭:", "Text");
             }
         });
         // save as file
         final JButton btnSave = new JButton();
-        btnSave.setIcon(new ImageIcon("./img/Save.png"));
+        btnSave.setIcon(new ImageIcon(this.getClass().getClassLoader().getResource("./img/Save.png")));
         btnSave.setBorderPainted(false);
         btnSave.addActionListener(new ActionListener() {
             @Override
@@ -198,7 +198,7 @@ class Frame extends JPanel {
         });
         // load file
         final JButton btnLoad = new JButton();
-        btnLoad.setIcon(new ImageIcon("./img/Load.png"));
+        btnLoad.setIcon(new ImageIcon(this.getClass().getClassLoader().getResource("./img/Load.png")));
         btnLoad.setBorderPainted(false);
         btnLoad.addActionListener(new ActionListener() {
             @Override
@@ -213,7 +213,7 @@ class Frame extends JPanel {
         });
         // select color
         final JButton btnColor = new JButton();
-        btnColor.setIcon(new ImageIcon("./img/Color.png"));
+        btnColor.setIcon(new ImageIcon(this.getClass().getClassLoader().getResource("./img/Color.png")));
         btnColor.setBorderPainted(false);
         btnColor.addActionListener(new ActionListener() {
             @Override

@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Model extends JPanel {
-    // State，0 means you can select, 1 draw line, 2 draw ellipse, 3 draw rectangle,
+    // State, 0 means you can select, 1 draw line, 2 draw ellipse, 3 draw rectangle,
     // 4 insert text
     public static int CurrentState = 0;
 

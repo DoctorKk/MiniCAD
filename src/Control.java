@@ -33,7 +33,6 @@ public class Control {
             public void mouseReleased(MouseEvent e) {
                 if (Model.CurrentState == 4) {
                     Model.itemsM.add(new itemsMesg(Model.CurrentState, Model.curText));
-
                 } else if (Model.CurrentState != 0) {
                     Shape temp = null;
 
@@ -97,7 +96,8 @@ public class Control {
                 temp = new Line2D.Float(x1, x2);
                 break;
             case 2:
-                temp = new Ellipse2D.Float(x1.x, x1.y, Math.abs(x2.x - x1.x), Math.abs(x2.y - x1.y));
+                temp = new Ellipse2D.Float(x1.x < x2.x ? x1.x : x2.x, x1.y < x2.y ? x1.y : x2.y, Math.abs(x2.x - x1.x),
+                        Math.abs(x2.y - x1.y));
                 break;
             case 3:
                 temp = new Rectangle2D.Float(Math.min(x1.x, x2.x), Math.min(x1.y, x2.y), Math.abs(x2.x - x1.x),
